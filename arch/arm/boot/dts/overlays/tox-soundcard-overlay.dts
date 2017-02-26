@@ -4,7 +4,7 @@
 
 / {
 	compatible = "brcm,bcm2708";
-
+	sdmode-gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
 	fragment@0 {
 		target = <&i2s>;
 		__overlay__ {

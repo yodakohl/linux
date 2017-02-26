@@ -48,12 +48,14 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
+		//This may have to be delayed
 		gpiod_set_value(sdmode, 1);
 		printk(KERN_ERR "Switching SDMODE 1\n");
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
+		//This may have to be delayed
 		printk(KERN_ERR "Switching SDMODE 0\n");
 		gpiod_set_value(sdmode, 0);
 		break;
