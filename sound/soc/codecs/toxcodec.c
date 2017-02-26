@@ -62,6 +62,20 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	return 0;
 }
 
+static int toxcodec_codec_probe(struct snd_soc_codec *codec)
+{
+	struct gpio_desc *sdmode;
+
+	sdmode = devm_gpiod_get_optional(codec->dev, "sdmode", GPIOD_OUT_LOW);
+	if (IS_ERR(sdmode))
+		return PTR_ERR(sdmode);
+
+	snd_soc_codec_set_drvdata(codec, sdmode);
+
+	return 0;
+}
+
+
 static struct snd_soc_codec_driver toxcodec_codec_driver = {
 	.probe				= toxcodec_codec_probe,
 	//.dapm_widgets		= max98357a_dapm_widgets,
@@ -108,19 +122,6 @@ static int toxcodec_probe(struct platform_device *pdev)
 }
 
 
-static int toxcodec_codec_probe(struct snd_soc_codec *codec)
-{
-	struct gpio_desc *sdmode;
-
-	sdmode = devm_gpiod_get_optional(codec->dev, "sdmode", GPIOD_OUT_LOW);
-	if (IS_ERR(sdmode))
-		return PTR_ERR(sdmode);
-
-	snd_soc_codec_set_drvdata(codec, sdmode);
-
-	return 0;
-}
-
 
 
 static int toxcodec_remove(struct platform_device *pdev)
@@ -135,7 +136,7 @@ static const struct of_device_id toxcodec_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, toxcodec_of_match);
 
-static struct platform_driver toxcodec_codec_driver = {
+static struct platform_driver toxcodec_platform_driver = {
 	.probe 		= toxcodec_probe,
 	.remove 	= toxcodec_remove,
 	.driver		= {
@@ -145,7 +146,7 @@ static struct platform_driver toxcodec_codec_driver = {
 	},
 };
 
-module_platform_driver(toxcodec_codec_driver);
+module_platform_driver(toxcodec_platform_driver);
 
 MODULE_DESCRIPTION("ASoC toxcodec codec driver");
 MODULE_AUTHOR("Florian Meier <florian.meier@koalo.de>");
