@@ -74,14 +74,17 @@ static int toxcodec_codec_probe(struct snd_soc_codec *codec)
 		return PTR_ERR(sdmode);
 
 	snd_soc_codec_set_drvdata(codec, sdmode);*/
-
+	printk(KERN_ERR "Toxcodec Probe\n");
 	if (codec->dev->of_node) {
+		printk(KERN_ERR "Found of_node\n");
 		struct device_node *pins_node;
 		pins_node = of_parse_phandle(codec->dev->of_node, "pinctrl-0", 0);
 
 		if (pins_node) {
+			printk(KERN_ERR "Found pins_node\n");
 			u32 pin;
 			of_property_read_u32_index(pins_node, "brcm,pins",0,&pin);
+			printk(KERN_ERR "Setting GPIO mute pin\n");
 			gpio_mute_pin = pin;
 		}
 
