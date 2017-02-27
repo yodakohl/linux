@@ -133,7 +133,7 @@ if (node) {
 
 	}*/
 
-	mute = devm_gpiod_get_optional(&pdev->dev, "mute")
+	mute = devm_gpiod_get_optional(&pdev->dev, "mute",GPIOD_OUT_LOW);
 
 	return snd_soc_register_codec(&pdev->dev, &soc_codec_dev_toxcodec,
 			&toxcodec_dai, 1);
