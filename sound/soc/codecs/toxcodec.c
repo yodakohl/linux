@@ -23,7 +23,7 @@
 #include <sound/soc.h>
 
 
-static int gpio_mute_pin = -1;
+static int gpio_mute_pin = 17;
 
 static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 		int cmd, struct snd_soc_dai *dai)
@@ -113,6 +113,21 @@ static struct snd_soc_codec_driver soc_codec_dev_toxcodec;
 
 static int toxcodec_probe(struct platform_device *pdev)
 {
+
+/*
+node = of_find_compatible_node(NULL, NULL,
+toxcodec_of_match[0].compatible);
+
+
+if (node) {
+		// DT-enabled 
+		lirc_rpi_dev = of_find_device_by_node(node);
+		WARN_ON(lirc_rpi_dev->dev.of_node != node);
+		of_node_put(node);
+}
+
+
+*/
 	printk(KERN_ERR "Toxcodec Probe\n");
 	if (&pdev->dev.of_node) {
 		printk(KERN_ERR "Found of_node\n");
