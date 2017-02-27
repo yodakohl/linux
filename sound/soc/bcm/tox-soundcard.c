@@ -75,17 +75,17 @@ static int snd_rpi_tox_soundcard_probe(struct platform_device *pdev)
 	snd_rpi_tox_soundcard.dev = &pdev->dev;
 
 	if (pdev->dev.of_node) {
-	    struct device_node *i2s_node;
-	    struct snd_soc_dai_link *dai = &snd_rpi_tox_soundcard_dai[0];
-	    i2s_node = of_parse_phandle(pdev->dev.of_node,
+		struct device_node *i2s_node;
+		struct snd_soc_dai_link *dai = &snd_rpi_tox_soundcard_dai[0];
+		i2s_node = of_parse_phandle(pdev->dev.of_node,
 					"i2s-controller", 0);
 
-	    if (i2s_node) {
-		dai->cpu_dai_name = NULL;
-		dai->cpu_of_node = i2s_node;
-		dai->platform_name = NULL;
-		dai->platform_of_node = i2s_node;
-	    }
+		if (i2s_node) {
+			dai->cpu_dai_name = NULL;
+			dai->cpu_of_node = i2s_node;
+			dai->platform_name = NULL;
+			dai->platform_of_node = i2s_node;
+		}
 	}
 
 	ret = snd_soc_register_card(&snd_rpi_tox_soundcard);

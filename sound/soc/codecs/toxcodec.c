@@ -23,14 +23,15 @@
 #include <sound/soc.h>
 
 
+static int gpio_mute_pin = -1;
+
 static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 		int cmd, struct snd_soc_dai *dai)
 {
- 
-	struct gpio_desc *sdmode = snd_soc_dai_get_drvdata(dai);
+
 	printk(KERN_ERR "toxcodec_daiops_trigger\n");
 
-	if (!sdmode){
+	if (gpio_mute_pin == -1){
 		printk(KERN_ERR "no sd mode\n");
 		return 0;
 	}
@@ -49,7 +50,7 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 		//This may have to be delayed
-		gpiod_set_value(sdmode, 1);
+		//gpiod_set_value(sdmode, 1);
 		printk(KERN_ERR "Switching SDMODE 1\n");
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
@@ -57,7 +58,7 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 		//This may have to be delayed
 		printk(KERN_ERR "Switching SDMODE 0\n");
-		gpiod_set_value(sdmode, 0);
+		//gpiod_set_value(sdmode, 0);
 		break;
 	}
 
@@ -119,6 +120,20 @@ static struct snd_soc_codec_driver soc_codec_dev_toxcodec;
 
 static int toxcodec_probe(struct platform_device *pdev)
 {
+
+	soc_codec_dev_toxcodec.dev = &pdev->dev;
+
+	if (pdev->dev.of_node) {
+		struct device_node *pins_node;
+		pins_node = of_parse_phandle(pdev->dev.of_node, "pinctrl-0", 0);
+
+		if (pins_node) {
+			u32 pin;
+			of_property_read_u32_index(node, "brcm,pins",0,&pin) == 0;
+			gpio_mute_pin = pin;
+		}
+
+
 	return snd_soc_register_codec(&pdev->dev, &soc_codec_dev_toxcodec,
 			&toxcodec_dai, 1);
 }
