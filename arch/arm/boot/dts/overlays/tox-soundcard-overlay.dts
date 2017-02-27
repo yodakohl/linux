@@ -18,7 +18,8 @@
 			toxcodec-codec {
 				#sound-dai-cells = <0>;
 				compatible = "tox,toxcodec";
-				mute-gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
+				pinctrl-names = "default";
+				mute-gpios = <&lirc_pins>;
 				status = "okay";
 			};
 		};
@@ -31,6 +32,21 @@
 			i2s-controller = <&i2s>;
 			status = "okay";
 		};
+	};
+
+	fragment@3 {
+			target = <&gpio>;
+			__overlay__ {
+				tox_pins: tox_pins {
+					brcm,pins = <17>;
+					brcm,function = <1>; // out in
+					brcm,pull = <1>; // off down
+				};
+			};
+	};
+
+	__overrides__ {
+		gpio_mute_pin =  <&tox_pins>,"brcm,pins:0";
 	};
 
 
