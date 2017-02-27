@@ -114,10 +114,10 @@ static struct snd_soc_codec_driver soc_codec_dev_toxcodec;
 static int toxcodec_probe(struct platform_device *pdev)
 {
 	printk(KERN_ERR "Toxcodec Probe\n");
-	if (&pdev->dev->of_node) {
+	if (&pdev->dev.of_node) {
 		printk(KERN_ERR "Found of_node\n");
 		struct device_node *pins_node;
-		pins_node = of_parse_phandle(&pdev->dev->of_node, "pinctrl-0", 0);
+		pins_node = of_parse_phandle(&pdev->dev.of_node, "pinctrl-0", 0);
 
 		if (pins_node) {
 			printk(KERN_ERR "Found pins_node\n");
