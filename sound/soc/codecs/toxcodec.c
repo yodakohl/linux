@@ -81,11 +81,11 @@ static int toxcodec_codec_probe(struct snd_soc_codec *codec)
 
 		if (pins_node) {
 			u32 pin;
-			of_property_read_u32_index(pins_node, "brcm,pins",0,&pin) == 0;
+			of_property_read_u32_index(pins_node, "brcm,pins",0,&pin);
 			gpio_mute_pin = pin;
 		}
 
-
+	}
 	return 0;
 }
 
