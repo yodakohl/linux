@@ -67,13 +67,24 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 
 static int toxcodec_codec_probe(struct snd_soc_codec *codec)
 {
-	struct gpio_desc *sdmode;
+	/*struct gpio_desc *sdmode;
 
 	sdmode = devm_gpiod_get_optional(codec->dev, "sdmode", GPIOD_OUT_LOW);
 	if (IS_ERR(sdmode))
 		return PTR_ERR(sdmode);
 
-	snd_soc_codec_set_drvdata(codec, sdmode);
+	snd_soc_codec_set_drvdata(codec, sdmode);*/
+
+	if (codec->dev.of_node) {
+		struct device_node *pins_node;
+		pins_node = of_parse_phandle(codec->dev.of_node, "pinctrl-0", 0);
+
+		if (pins_node) {
+			u32 pin;
+			of_property_read_u32_index(pins_node, "brcm,pins",0,&pin) == 0;
+			gpio_mute_pin = pin;
+		}
+
 
 	return 0;
 }
@@ -121,19 +132,6 @@ static struct snd_soc_codec_driver soc_codec_dev_toxcodec;
 static int toxcodec_probe(struct platform_device *pdev)
 {
 
-	soc_codec_dev_toxcodec.dev = &pdev->dev;
-
-	if (pdev->dev.of_node) {
-		struct device_node *pins_node;
-		pins_node = of_parse_phandle(pdev->dev.of_node, "pinctrl-0", 0);
-
-		if (pins_node) {
-			u32 pin;
-			of_property_read_u32_index(node, "brcm,pins",0,&pin) == 0;
-			gpio_mute_pin = pin;
-		}
-
-
 	return snd_soc_register_codec(&pdev->dev, &soc_codec_dev_toxcodec,
 			&toxcodec_dai, 1);
 }
@@ -153,7 +151,7 @@ static const struct of_device_id toxcodec_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, toxcodec_of_match);
 
-static struct platform_driver toxcodec_platform_driver = {
+static struct platform_driver toxcodec_codec_driver = {
 	.probe 		= toxcodec_probe,
 	.remove 	= toxcodec_remove,
 	.driver		= {
@@ -163,7 +161,7 @@ static struct platform_driver toxcodec_platform_driver = {
 	},
 };
 
-module_platform_driver(toxcodec_platform_driver);
+module_platform_driver(toxcodec_codec_driver);
 
 MODULE_DESCRIPTION("ASoC toxcodec codec driver");
 MODULE_AUTHOR("Florian Meier <florian.meier@koalo.de>");
