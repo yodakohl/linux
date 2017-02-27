@@ -75,9 +75,9 @@ static int toxcodec_codec_probe(struct snd_soc_codec *codec)
 
 	snd_soc_codec_set_drvdata(codec, sdmode);*/
 
-	if (codec->dev.of_node) {
+	if (codec->dev->of_node) {
 		struct device_node *pins_node;
-		pins_node = of_parse_phandle(codec->dev.of_node, "pinctrl-0", 0);
+		pins_node = of_parse_phandle(codec->dev->of_node, "pinctrl-0", 0);
 
 		if (pins_node) {
 			u32 pin;
@@ -90,13 +90,6 @@ static int toxcodec_codec_probe(struct snd_soc_codec *codec)
 }
 
 
-static struct snd_soc_codec_driver toxcodec_codec_driver = {
-	.probe				= toxcodec_codec_probe,
-	//.dapm_widgets		= max98357a_dapm_widgets,
-	//.num_dapm_widgets	= ARRAY_SIZE(max98357a_dapm_widgets),
-	//.dapm_routes		= max98357a_dapm_routes,
-	//.num_dapm_routes	= ARRAY_SIZE(max98357a_dapm_routes),
-};
 
 
 static const struct snd_soc_dai_ops toxcodec_dai_ops = {
