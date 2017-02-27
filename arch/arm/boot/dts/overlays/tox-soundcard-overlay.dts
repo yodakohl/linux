@@ -19,8 +19,6 @@
 				#sound-dai-cells = <0>;
 				compatible = "tox,toxcodec";
 				mute-gpios = <&gpio 17 1>;
-				pinctrl-names = "default";
-				mute-gpios = <&lirc_pins>;
 				status = "okay";
 			};
 		};
