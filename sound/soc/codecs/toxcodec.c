@@ -24,6 +24,7 @@
 
 
 static int gpio_mute_pin = 17;
+struct gpio_desc *mute = NULL;
 
 static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 		int cmd, struct snd_soc_dai *dai)
@@ -31,7 +32,7 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 
 	printk(KERN_ERR "toxcodec_daiops_trigger\n");
 
-	if (gpio_mute_pin == -1){
+	if (mute == NULL){
 		printk(KERN_ERR "no sd mode\n");
 		return 0;
 	}
@@ -50,7 +51,7 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 		//This may have to be delayed
-		//gpiod_set_value(sdmode, 1);
+		gpiod_set_value(mute, 1);
 		printk(KERN_ERR "Switching SDMODE 1\n");
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
@@ -58,25 +59,13 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 		//This may have to be delayed
 		printk(KERN_ERR "Switching SDMODE 0\n");
-		//gpiod_set_value(sdmode, 0);
+		gpiod_set_value(mute, 0);
 		break;
 	}
 
 	return 0;
 }
 
-static int toxcodec_codec_probe(struct snd_soc_codec *codec)
-{
-	/*struct gpio_desc *sdmode;
-
-	sdmode = devm_gpiod_get_optional(codec->dev, "sdmode", GPIOD_OUT_LOW);
-	if (IS_ERR(sdmode))
-		return PTR_ERR(sdmode);
-
-	snd_soc_codec_set_drvdata(codec, sdmode);*/
-
-	return 0;
-}
 
 
 
@@ -128,7 +117,7 @@ if (node) {
 
 
 */
-	printk(KERN_ERR "Toxcodec Probe\n");
+	/*printk(KERN_ERR "Toxcodec Probe\n");
 	if (&pdev->dev.of_node) {
 		printk(KERN_ERR "Found of_node\n");
 		struct device_node *pins_node;
@@ -142,7 +131,9 @@ if (node) {
 			gpio_mute_pin = pin;
 		}
 
-	}
+	}*/
+
+	mute = devm_gpiod_get_optional(&pdev->dev, "mute")
 
 	return snd_soc_register_codec(&pdev->dev, &soc_codec_dev_toxcodec,
 			&toxcodec_dai, 1);
