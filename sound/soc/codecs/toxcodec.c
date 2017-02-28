@@ -51,7 +51,7 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 		//This may have to be delayed
-		gpiod_set_value(mute, 1);
+		gpiod_set_value(mute, 0);
 		printk(KERN_ERR "Switching SDMODE 1\n");
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
@@ -59,7 +59,7 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 		//This may have to be delayed
 		printk(KERN_ERR "Switching SDMODE 0\n");
-		gpiod_set_value(mute, 0);
+		gpiod_set_value(mute, 1);
 		break;
 	}
 
@@ -133,7 +133,7 @@ if (node) {
 
 	}*/
 
-	mute = devm_gpiod_get_optional(&pdev->dev, "mute",GPIOD_OUT_LOW);
+	mute = devm_gpiod_get_optional(&pdev->dev, "mute",GPIOD_OUT_HIGH);
 
 	return snd_soc_register_codec(&pdev->dev, &soc_codec_dev_toxcodec,
 			&toxcodec_dai, 1);
