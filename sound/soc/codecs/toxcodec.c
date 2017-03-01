@@ -51,14 +51,15 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 		//This may have to be delayed
+		msleep(5);
 		gpiod_set_value(mute, 0);
-		printk(KERN_ERR "Switching SDMODE 1\n");
+		printk(KERN_ERR "Switching SDMODE 0\n");
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-		//This may have to be delayed
-		printk(KERN_ERR "Switching SDMODE 0\n");
+
+		printk(KERN_ERR "Switching SDMODE 1\n");
 		gpiod_set_value(mute, 1);
 		break;
 	}
@@ -102,36 +103,6 @@ static struct snd_soc_codec_driver soc_codec_dev_toxcodec;
 
 static int toxcodec_probe(struct platform_device *pdev)
 {
-
-/*
-node = of_find_compatible_node(NULL, NULL,
-toxcodec_of_match[0].compatible);
-
-
-if (node) {
-		// DT-enabled 
-		lirc_rpi_dev = of_find_device_by_node(node);
-		WARN_ON(lirc_rpi_dev->dev.of_node != node);
-		of_node_put(node);
-}
-
-
-*/
-	/*printk(KERN_ERR "Toxcodec Probe\n");
-	if (&pdev->dev.of_node) {
-		printk(KERN_ERR "Found of_node\n");
-		struct device_node *pins_node;
-		pins_node = of_parse_phandle(&pdev->dev.of_node, "pinctrl-0", 0);
-
-		if (pins_node) {
-			printk(KERN_ERR "Found pins_node\n");
-			u32 pin;
-			of_property_read_u32_index(pins_node, "brcm,pins",0,&pin);
-			printk(KERN_ERR "Setting GPIO mute pin\n");
-			gpio_mute_pin = pin;
-		}
-
-	}*/
 
 	mute = devm_gpiod_get_optional(&pdev->dev, "mute",GPIOD_OUT_HIGH);
 
