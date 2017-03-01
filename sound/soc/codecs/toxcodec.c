@@ -21,7 +21,7 @@
 #include <linux/gpio.h>
 #include <linux/gpio/consumer.h>
 #include <sound/soc.h>
-
+#include <linux/delay.h>
 
 static int gpio_mute_pin = 17;
 struct gpio_desc *mute = NULL;
