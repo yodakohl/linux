@@ -42,7 +42,7 @@ static void max98357a_enable_sdmode_work(struct work_struct *work)
         container_of(work, struct max98357a_priv,
                         enable_sdmode_work.work);
 
-        gpiod_set_value(max98357a->sdmode, 1);
+        gpiod_set_value(max98357a->sdmode, 0);
 }
 
 
@@ -54,16 +54,10 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 
 	printk(KERN_ERR "toxcodec_daiops_trigger\n");
 
-//        struct snd_soc_codec *codec = dai->codec;
-//        struct max98357a_priv *max98357a = snd_soc_codec_get_drvdata(codec);
 
-         if (!max98357a->sdmode)
-                  return 0;
+	if (!max98357a->sdmode)
+		return 0;
 
-//	if (mute == NULL){
-//		printk(KERN_ERR "no sd mode\n");
-//		return 0;
-//	}
 
 
 	//Only for playback direction
@@ -161,11 +155,7 @@ static int toxcodec_probe(struct platform_device *pdev)
 
 static int toxcodec_remove(struct platform_device *pdev)
 {
-
-//	struct max98357a_priv *max98357a = pdev->dev;
 	cancel_delayed_work_sync(&max98357a->enable_sdmode_work);
-
-
 	snd_soc_unregister_codec(&pdev->dev);
 	return 0;
 }
