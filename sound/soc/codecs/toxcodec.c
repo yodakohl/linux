@@ -20,11 +20,33 @@
 #include <linux/platform_device.h>
 #include <linux/gpio.h>
 #include <linux/gpio/consumer.h>
+#include <linux/jiffies.h>
+#include <linux/workqueue.h>
+
 #include <sound/soc.h>
-#include <linux/delay.h>
 
 static int gpio_mute_pin = 17;
 struct gpio_desc *mute = NULL;
+struct max98357a_priv *max98357a;
+
+
+struct max98357a_priv {
+        struct delayed_work enable_sdmode_work;
+        struct gpio_desc *sdmode;
+        unsigned int sdmode_delay;
+};
+
+static void max98357a_enable_sdmode_work(struct work_struct *work)
+{
+        struct max98357a_priv *max98357a =
+        container_of(work, struct max98357a_priv,
+                        enable_sdmode_work.work);
+
+        gpiod_set_value(max98357a->sdmode, 1);
+}
+
+
+
 
 static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 		int cmd, struct snd_soc_dai *dai)
@@ -32,10 +54,16 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 
 	printk(KERN_ERR "toxcodec_daiops_trigger\n");
 
-	if (mute == NULL){
-		printk(KERN_ERR "no sd mode\n");
-		return 0;
-	}
+//        struct snd_soc_codec *codec = dai->codec;
+//        struct max98357a_priv *max98357a = snd_soc_codec_get_drvdata(codec);
+
+         if (!max98357a->sdmode)
+                  return 0;
+
+//	if (mute == NULL){
+//		printk(KERN_ERR "no sd mode\n");
+//		return 0;
+//	}
 
 
 	//Only for playback direction
@@ -50,22 +78,27 @@ static int toxcodec_daiops_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		//This may have to be delayed
-		msleep(5);
-		gpiod_set_value(mute, 0);
+                queue_delayed_work(system_power_efficient_wq,
+                                &max98357a->enable_sdmode_work,
+                                msecs_to_jiffies(max98357a->sdmode_delay));
+		//gpiod_set_value(mute, 0);
 		printk(KERN_ERR "Switching SDMODE 0\n");
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-
+                cancel_delayed_work(&max98357a->enable_sdmode_work);
+                gpiod_set_value(max98357a->sdmode, 1);
 		printk(KERN_ERR "Switching SDMODE 1\n");
-		gpiod_set_value(mute, 1);
+		//gpiod_set_value(mute, 1);
 		break;
 	}
 
 	return 0;
 }
+
+
+
 
 
 
@@ -103,8 +136,21 @@ static struct snd_soc_codec_driver soc_codec_dev_toxcodec;
 
 static int toxcodec_probe(struct platform_device *pdev)
 {
+        max98357a = devm_kzalloc(&pdev->dev, sizeof(*max98357a), GFP_KERNEL);
 
-	mute = devm_gpiod_get_optional(&pdev->dev, "mute",GPIOD_OUT_HIGH);
+        if (!max98357a)
+                return -ENOMEM;
+
+         max98357a->sdmode = devm_gpiod_get_optional(&pdev->dev, "mute",GPIOD_OUT_HIGH);
+         max98357a->sdmode_delay = 10;
+         if (IS_ERR(max98357a->sdmode))
+               return PTR_ERR(max98357a->sdmode);
+
+
+         INIT_DELAYED_WORK(&max98357a->enable_sdmode_work,max98357a_enable_sdmode_work);
+
+
+
 
 	return snd_soc_register_codec(&pdev->dev, &soc_codec_dev_toxcodec,
 			&toxcodec_dai, 1);
@@ -115,6 +161,11 @@ static int toxcodec_probe(struct platform_device *pdev)
 
 static int toxcodec_remove(struct platform_device *pdev)
 {
+
+//	struct max98357a_priv *max98357a = pdev->dev;
+	cancel_delayed_work_sync(&max98357a->enable_sdmode_work);
+
+
 	snd_soc_unregister_codec(&pdev->dev);
 	return 0;
 }
