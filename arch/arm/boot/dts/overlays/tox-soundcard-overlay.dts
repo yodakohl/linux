@@ -15,7 +15,7 @@
 	fragment@1 {
 		target-path = "/";
 		__overlay__ {
-			mic-codec {
+			mic_codec {
 				#sound-dai-cells = <0>;
 				compatible = "invensense,ics43432";
 				status = "okay";
@@ -26,7 +26,7 @@
 	fragment@2 {
 		target-path = "/";
 		__overlay__ {
-			amp-codec {
+			amp_codec {
 				#sound-dai-cells = <0>;
 				compatible = "maxim,max98357a";
 				sdmode-gpios = <&gpio 17 1>;
@@ -41,6 +41,7 @@
 			compatible = "simple-audio-card";
 			simple-audio-card,name = "Tox-Simple-Card";
 			simple-audio-card,format = "i2s";
+			status = "okay";
 			simple-audio-card,bitclock-master = <&dailink0_master>;
 			simple-audio-card,frame-master = <&dailink0_master>;
 			simple-audio-card,cpu {
@@ -48,17 +49,18 @@
 			};
 
 
-			dailink0_master: simple-audio-card,codec {
-				sound-dai = <&mic-codec>;
+			simple-audio-card,dai-link@0 {		/* I2S - MIC */
+
+				codec {
+					sound-dai = <&mic_codec>;
+				};
 			};
 
-			dailink1_master: simple-audio-card,codec {
-				sound-dai = <&amp-codec>;
+			simple-audio-card,dai-link@1 {		/* I2S AMP */
+				codec {
+					sound-dai = <&amp_codec>;
+				};
 			};
-
-
-			i2s-controller = <&i2s>;
-			status = "okay";
 		};
 	};
 
