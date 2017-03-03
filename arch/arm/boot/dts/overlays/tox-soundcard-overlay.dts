@@ -1,4 +1,4 @@
-// Definitions for HiFiBerry DAC
+// Definitions for Nyumaya Card
 /dts-v1/;
 /plugin/;
 
@@ -15,25 +15,58 @@
 	fragment@1 {
 		target-path = "/";
 		__overlay__ {
-			toxcodec-codec {
+			mic-codec {
 				#sound-dai-cells = <0>;
-				compatible = "tox,toxcodec";
-				mute-gpios = <&gpio 17 1>;
+				compatible = "invensense,ics43432";
 				status = "okay";
 			};
 		};
 	};
 
 	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+			amp-codec {
+				#sound-dai-cells = <0>;
+				compatible = "maxim,max98357a";
+				sdmode-gpios = <&gpio 17 1>;
+				status = "okay";
+			};
+		};
+	};
+
+	fragment@3 {
 		target = <&sound>;
 		__overlay__ {
-			compatible = "tox,tox-soundcard";
+			compatible = "simple-audio-card";
+			simple-audio-card,name = "Tox-Simple-Card";
+			simple-audio-card,format = "i2s";
+			simple-audio-card,bitclock-master = <&dailink0_master>;
+			simple-audio-card,frame-master = <&dailink0_master>;
+			simple-audio-card,cpu {
+				sound-dai = <&i2s>;
+			};
+
+
+			dailink0_master: simple-audio-card,codec {
+				sound-dai = <&mic-codec>;
+			};
+
+			dailink1_master: simple-audio-card,codec {
+				sound-dai = <&amp-codec>;
+			};
+
+
 			i2s-controller = <&i2s>;
 			status = "okay";
 		};
 	};
 
-	fragment@3 {
+
+
+
+
+	fragment@4 {
 			target = <&gpio>;
 			__overlay__ {
 				tox_pins: tox_pins {
